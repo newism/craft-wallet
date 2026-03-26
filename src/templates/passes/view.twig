@@ -1,0 +1,103 @@
+{% do view.registerAssetBundle('newism\\wallet\\web\\assets\\cp\\WalletCpAsset') %}
+
+<div id="overview">
+    <dl class="newism-dl">
+        <dt>User</dt>
+        <dd>{{ chip(pass.getUser()) }}</dd>
+
+        <dt>Generator</dt>
+        <dd>{{ pass.generatorHandle }}</dd>
+
+        {% if pass.source and pass.source is instance of('craft\\base\\Chippable') %}
+            <dt>Source</dt>
+            <dd>{{ chip(pass.source) }}</dd>
+        {% elseif pass.sourceId %}
+            <dt>Source ID</dt>
+            <dd>{{ pass.sourceId }}</dd>
+        {% endif %}
+
+        {% if pass.sourceIndex %}
+            <dt>Source Index</dt>
+            <dd>{{ pass.sourceIndex }}</dd>
+        {% endif %}
+
+        <dt>UID</dt>
+        <dd><code>{{ pass.uid }}</code></dd>
+
+        <dt>Auth Token</dt>
+        <dd><code>{{ pass.authToken }}</code></dd>
+    </dl>
+
+    <hr>
+
+    <h3>Add to Wallet</h3>
+    <form method="post">
+        {{ csrfInput() }}
+        {{ actionInput('wallet/passes/add-to-wallet') }}
+        {{ hiddenInput('generatorHandle', pass.generatorHandle) }}
+        {{ hiddenInput('userId', pass.userId) }}
+        {{ hiddenInput('sourceId', pass.sourceId) }}
+        {{ hiddenInput('sourceIndex', pass.sourceIndex) }}
+
+        {{ include('_includes/forms/button', {
+            label: 'Add to Apple Wallet',
+            icon: 'apple',
+            attributes: {
+                type: 'submit',
+                name: 'platform',
+                value: 'apple',
+            },
+        }) }}
+        {{ include('_includes/forms/button', {
+            label: 'Add to Google Wallet',
+            icon: 'google',
+            attributes: {
+                type: 'submit',
+                name: 'platform',
+                value: 'google',
+            },
+        }) }}
+    </form>
+</div>
+
+<div id="devices" class="hidden">
+    {% do view.registerAssetBundle('craft\\web\\assets\\admintable\\AdminTableAsset') %}
+    <div id="wallet-devices-table"></div>
+    {% js %}
+        new Craft.VueAdminTable({
+            columns: [
+                { name: '__slot:title', title: Craft.t('app', 'Device ID') },
+                { name: 'pushToken', title: Craft.t('app', 'Push Token') },
+                { name: 'dateCreated', title: Craft.t('app', 'Registered') },
+            ],
+            container: '#wallet-devices-table',
+            emptyMessage: Craft.t('app', 'No devices registered.'),
+            tableData: {{ devices|map(d => {
+                id: d.id,
+                title: d.deviceLibraryIdentifier,
+                pushToken: d.pushToken ? d.pushToken[:12] ~ '…' : '—',
+                dateCreated: d.dateCreated|datetime,
+            })|json_encode|raw }},
+            fullPane: false,
+            padded: true,
+        });
+    {% endjs %}
+</div>
+
+<div id="debug" class="hidden">
+    {% if pass.applePassJson %}
+        <h3>Apple Pass JSON</h3>
+        <div class="code"
+             style="white-space: pre-wrap; font-size: 0.85em; max-height: 400px; overflow: auto; padding: 12px; background: var(--gray-050); border-radius: 4px;">{{ pass.applePassJson }}</div>
+    {% endif %}
+
+    {% if pass.googlePassJson %}
+        <h3>Google Pass JSON</h3>
+        <div class="code"
+             style="white-space: pre-wrap; font-size: 0.85em; max-height: 400px; overflow: auto; padding: 12px; background: var(--gray-050); border-radius: 4px;">{{ pass.googlePassJson }}</div>
+    {% endif %}
+
+    {% if not pass.applePassJson and not pass.googlePassJson %}
+        <p class="zilch">No pass JSON captured yet. Add the pass to a wallet to generate it.</p>
+    {% endif %}
+</div>

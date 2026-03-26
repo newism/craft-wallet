@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wallet Passes — Test Kitchen Sink</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 960px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            color: #333;
+        }
+
+        h1 {
+            border-bottom: 2px solid #1848ef;
+            padding-bottom: .5rem;
+        }
+
+        h2 {
+            margin-top: 2rem;
+            color: #1848ef;
+        }
+
+        h3 {
+            margin-top: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            text-align: left;
+            padding: .5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            font-weight: 600;
+            background: #f9fafb;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: .85em;
+        }
+
+        .badge-green {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-red {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-gray {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: .5rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: #fff;
+            cursor: pointer;
+            font-size: .9em;
+            margin-right: .5rem;
+            margin-top: .25rem;
+        }
+
+        .btn:hover {
+            background: #f9fafb;
+        }
+
+        .btn-apple {
+            background: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        .btn-apple:hover {
+            background: #333;
+        }
+
+        .btn-google {
+            background: #4285f4;
+            color: #fff;
+            border-color: #4285f4;
+        }
+
+        .btn-google:hover {
+            background: #3367d6;
+        }
+
+        .section {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .code {
+            font-family: monospace;
+            font-size: .85em;
+            color: #6b7280;
+        }
+
+        .flash {
+            padding: 1rem;
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Wallet Passes — Test Kitchen Sink</h1>
+<p class="code">Dev mode only. User: {{ currentUser.fullName ?? 'Not logged in' }} (ID: {{ currentUser.id ?? '—' }})</p>
+
+{% if not currentUser %}
+    <div class="flash">You must be logged in to test wallet passes. <a href="/admin/login">Log in</a></div>
+{% else %}
+
+    {# ============================================================ #}
+    {# SECTION 1: Purchasables — Wallet Eligible Field Check         #}
+    {# ============================================================ #}
+    <h2>1. Purchasables — Wallet Eligible</h2>
+    <p>All Commerce variants and their wallet pass eligibility status.</p>
+
+    {% if craft.app.plugins.getPlugin('commerce') %}
+        {% set variants = craft.variants.all() %}
+        <div class="section">
+            <table>
+                <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Variant</th>
+                    <th>SKU</th>
+                    <th>Wallet Eligible</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for variant in variants %}
+                    {% set product = variant.owner %}
+                    {% set walletData = product and product.fieldLayout.getFieldByHandle('walletPasses') ? product.getFieldValue('walletPasses') : null %}
+                    <tr>
+                        <td>{{ variant.product.title ?? '—' }}</td>
+                        <td>{{ variant.title }}</td>
+                        <td class="code">{{ variant.sku }}</td>
+                        <td>
+                            {% if walletData and walletData.eligible %}
+                                <span class="badge badge-green">Eligible</span>
+                            {% elseif walletData %}
+                                <span class="badge badge-red">Not Eligible</span>
+                            {% else %}
+                                <span class="badge badge-gray">No Field</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="badge badge-gray">Commerce plugin not installed.</p>
+    {% endif %}
+
+    {# ============================================================ #}
+    {# SECTION 2: Commerce Orders — Add to Wallet                    #}
+    {# ============================================================ #}
+    <h2>2. Commerce Orders — Eligible Line Items</h2>
+    <p>Completed orders for the current user with wallet-eligible purchasables.</p>
+
+    {% if craft.app.plugins.getPlugin('commerce') %}
+        {% set orders = craft.orders.customer(currentUser).isCompleted(true).orderBy('dateOrdered DESC').all() %}
+
+        {% if orders|length %}
+            {% for order in orders %}
+                <div class="section">
+                    <h3>
+                        Order {{ order.reference }}
+                        <span class="code">— {{ order.dateOrdered|date('M j, Y') }}</span>
+                    </h3>
+                    {% for lineItem in order.lineItems %}
+                        {% set purchasable = lineItem.purchasable %}
+                        {% set product = purchasable ? purchasable.owner : null %}
+                        {% set walletData = product and product.fieldLayout.getFieldByHandle('walletPasses') ? product.getFieldValue('walletPasses') : null %}
+                        {% set isEligible = walletData and walletData.eligible %}
+                        <div style="margin: .75rem 0; padding: .75rem; background: {{ isEligible ? '#f0fdf4' : '#fef2f2' }}; border-radius: 6px;">
+                            <strong>{{ lineItem.description }}</strong>
+                            <span class="code">× {{ lineItem.qty }}</span>
+                            {% if isEligible %}
+                                <span class="badge badge-green">Eligible</span>
+                            {% else %}
+                                <span class="badge badge-red">Not Eligible</span>
+                            {% endif %}
+
+                            {% if isEligible %}
+                                {% for i in 0..(lineItem.qty - 1) %}
+                                    <div style="margin-top: .5rem; padding-left: 1rem;">
+                                        <strong>#{{ i + 1 }}</strong>
+                                        {% set existingPass = craft.wallet.passes.userId(currentUser.id).generatorHandle('craft-commerce').sourceId(lineItem.id).one() %}
+                                        {% if existingPass %}
+                                            <span class="code">Pass: {{ existingPass.uid[:8] }}…</span>
+                                        {% endif %}
+                                        <form method="post" style="display: inline;">
+                                            {{ csrfInput() }}
+                                            {{ actionInput('wallet/passes/add-to-wallet') }}
+                                            {{ hiddenInput('generatorHandle', 'craft-commerce') }}
+                                            {{ hiddenInput('userId', currentUser.id) }}
+                                            {{ hiddenInput('sourceId', lineItem.id) }}
+                                            {{ hiddenInput('sourceIndex', i) }}
+                                            <button type="submit" name="platform" value="apple"
+                                                    class="btn btn-apple">Add to Apple Wallet
+                                            </button>
+                                            <button type="submit" name="platform" value="google"
+                                                    class="btn btn-google">Add to Google Wallet
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="badge badge-gray">No completed orders.</p>
+        {% endif %}
+    {% else %}
+        <p class="badge badge-gray">Commerce plugin not installed.</p>
+    {% endif %}
+
+    {# ============================================================ #}
+    {# SECTION 3: Event Tickets — Add to Wallet                      #}
+    {# ============================================================ #}
+    <h2>3. Event Tickets — Purchased Tickets</h2>
+    <p>Purchased tickets for the current user.</p>
+
+    {% if craft.app.plugins.getPlugin('events') %}
+        {% set tickets = craft.events.purchasedTickets().customer(currentUser).all() %}
+
+        {% if tickets|length %}
+            <div class="section">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Event</th>
+                        <th>Ticket</th>
+                        <th>Session</th>
+                        <th>Checked In</th>
+                        <th>Pass</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for ticket in tickets %}
+                        {% set event = ticket.event %}
+                        {% set session = ticket.session %}
+                        {% set existingPass = craft.wallet.passes.userId(currentUser.id).generatorHandle('verbb-events').sourceId(ticket.id).one() %}
+                        <tr>
+                            <td>{{ event.title ?? '—' }}</td>
+                            <td>{{ ticket.title }}</td>
+                            <td>
+                                {% if session %}
+                                    {{ session.startDate|date('M j, Y g:i A') }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if ticket.checkedIn %}
+                                    <span class="badge badge-green">Yes</span>
+                                {% else %}
+                                    <span class="badge badge-gray">No</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if existingPass %}
+                                    <span class="code">{{ existingPass.uid[:8] }}…</span>
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form method="post" style="display: inline;">
+                                    {{ csrfInput() }}
+                                    {{ actionInput('wallet/passes/add-to-wallet') }}
+                                    {{ hiddenInput('generatorHandle', 'verbb-events') }}
+                                    {{ hiddenInput('userId', currentUser.id) }}
+                                    {{ hiddenInput('sourceId', ticket.id) }}
+                                    <button type="submit" name="platform" value="apple" class="btn btn-apple">Apple
+                                    </button>
+                                    <button type="submit" name="platform" value="google" class="btn btn-google">Google
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="badge badge-gray">No purchased tickets.</p>
+        {% endif %}
+    {% else %}
+        <p class="badge badge-gray">Events plugin not installed.</p>
+    {% endif %}
+
+    {# ============================================================ #}
+    {# SECTION 4: Membership — Add to Wallet                         #}
+    {# ============================================================ #}
+    <h2>4. Membership Pass</h2>
+
+    {% set membershipPass = craft.wallet.passes.userId(currentUser.id).generatorHandle('membership').one() %}
+
+    <div class="section">
+        {% if membershipPass %}
+            <p>Membership pass exists: <span class="code">{{ membershipPass.uid }}</span></p>
+        {% else %}
+            <p>No membership pass yet.</p>
+        {% endif %}
+
+        <form method="post" style="margin-top: .5rem;">
+            {{ csrfInput() }}
+            {{ actionInput('wallet/passes/add-to-wallet') }}
+            {{ hiddenInput('generatorHandle', 'membership') }}
+            {{ hiddenInput('userId', currentUser.id) }}
+            <button type="submit" name="platform" value="apple" class="btn btn-apple">Add to Apple Wallet</button>
+            <button type="submit" name="platform" value="google" class="btn btn-google">Add to Google Wallet</button>
+        </form>
+    </div>
+
+    {# ============================================================ #}
+    {# SECTION 5: All Passes for Current User                         #}
+    {# ============================================================ #}
+    <h2>5. All Passes for {{ currentUser.fullName }}</h2>
+
+    {% set allPasses = craft.wallet.passes.userId(currentUser.id).all() %}
+
+    <div class="section">
+        {% if allPasses|length %}
+            <table>
+                <thead>
+                <tr>
+                    <th>UID</th>
+                    <th>Generator</th>
+                    <th>Source ID</th>
+                    <th>Source Index</th>
+                    <th>Created</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for pass in allPasses %}
+                    <tr>
+                        <td class="code">{{ pass.uid[:8] }}…</td>
+                        <td>{{ pass.generatorHandle }}</td>
+                        <td>{{ pass.sourceId ?? '—' }}</td>
+                        <td>{{ pass.sourceIndex ?? '—' }}</td>
+                        <td>{{ pass.dateCreated|date('M j, Y g:i A') }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="badge badge-gray">No passes.</p>
+        {% endif %}
+    </div>
+
+{% endif %}
+
+</body>
+</html>

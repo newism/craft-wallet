@@ -1,0 +1,115 @@
+
+/* Wallet pass list styles (user settings screen) */
+
+.wlt-groups {
+    > hr {
+        margin-inline: var(--neg-padding);
+    }
+}
+
+.wlt-group {
+}
+
+.wlt-section {
+    display: grid;
+    gap: var(--m);
+    /*border: 1px solid blue;*/
+}
+
+.wlt-section + .wlt-section {
+    margin-block-start: var(--m);
+}
+
+.wlt-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+    gap: var(--m);
+}
+
+.wlt-item {
+    background: var(--gray-100);
+    padding: var(--m);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--hairline-color);
+    display: grid;
+    align-content: start;
+    row-gap: var(--m);
+
+    .wlt-item-header {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--m);
+    }
+
+    h3 {
+        margin: 0;
+        font-weight: normal;
+        display: grid;
+        gap: var(--xs);
+
+        strong {
+            display: block;
+        }
+    }
+}
+
+.wlt-item__actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--xs);
+}
+
+.wlt-section__separator {
+    border-color: var(--hairline-color);
+    margin: 0 var(--neg-padding);
+}
+
+/* Wallet pass card styles (pass detail view) */
+[data-wallet-pass] .tab-content {
+    padding-block-start: var(--m);
+}
+
+[data-wallet-pass] .tab-content dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.25rem 1rem;
+    margin: 0;
+}
+
+[data-wallet-pass] .tab-content dt {
+    color: var(--gray-500);
+    white-space: nowrap;
+}
+
+[data-wallet-pass] .tab-content dd {
+    margin: 0;
+}
+
+
+.newism-dl {
+    display: grid;
+    grid-template-columns: fit-content(var(--dt-max-width, 200px)) 1fr;
+    gap: 0;
+    margin: 0;
+    border-radius: 5px;
+    box-shadow: rgb(205, 216, 228) 0px 0px 0px 1px;
+    overflow: hidden;
+}
+
+.newism-dl dt {
+    font-weight: bold;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.newism-dl dd {
+    font-weight: normal;
+    margin: 0;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.newism-dl dt:last-of-type,
+.newism-dl dd:last-of-type {
+    border-bottom: none;
+}

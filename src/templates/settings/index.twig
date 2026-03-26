@@ -1,0 +1,22 @@
+{# --- Overview Tab --- #}
+<div id="overview">
+    <div class="readable">
+        <p>Settings are managed via <code>config/wallet/wallet.php</code> and environment variables.
+            <code>WALLET_*</code> ENV vars always take precedence.</p>
+        <p>
+            For setup and configuration instructions, see the
+            <a href="https://github.com/newism/craft-wallet/README.md#settings" target="_blank"
+               rel="noopener">documentation</a>.
+        </p>
+    </div>
+</div>
+
+{# --- Apple Wallet Tab --- #}
+<div id="apple" class="hidden">
+    {% include 'wallet/settings/_platform' with { platform: apple } only %}
+</div>
+
+{# --- Google Wallet Tab --- #}
+<div id="google" class="hidden">
+    {% include 'wallet/settings/_platform' with { platform: google } only %}
+</div>

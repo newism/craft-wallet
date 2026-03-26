@@ -1,0 +1,67 @@
+{% if eligibleItems|length %}
+    <form method="post">
+        {{ csrfInput() }}
+        <div class="wlt-groups">
+            {% for item in eligibleItems %}
+                {% set existingPass = passIndex[item.sourceId ?? 'null'] ?? null %}
+                <div class="wlt-group">
+                    <h2>{{ item.label }}</h2>
+                    <div class="wlt-section">
+                        <div class="wlt-items">
+                            <div class="wlt-item">
+                                <h3><strong>Member Card</strong></h3>
+                                <div class="wlt-item__actions">
+                                    {{ include('_includes/forms/button', {
+                                        class: 'formsubmit',
+                                        label: 'Add to Apple Wallet',
+                                        icon: 'apple',
+                                        attributes: {
+                                            data: {
+                                                action: 'wallet/passes/add-to-wallet',
+                                                params: {
+                                                    generatorHandle: generatorHandle,
+                                                    userId: user.id,
+                                                    platform: 'apple',
+                                                    sourceId: item.sourceId,
+                                                    sourceIndex: null,
+                                                },
+                                            },
+                                        },
+                                    }) }}
+                                    {{ include('_includes/forms/button', {
+                                        class: 'formsubmit',
+                                        label: 'Add to Google Wallet',
+                                        icon: 'google',
+                                        attributes: {
+                                            data: {
+                                                action: 'wallet/passes/add-to-wallet',
+                                                params: {
+                                                    generatorHandle: generatorHandle,
+                                                    userId: user.id,
+                                                    platform: 'google',
+                                                    sourceId: item.sourceId,
+                                                    sourceIndex: null,
+                                                },
+                                            },
+                                        },
+                                    }) }}
+                                </div>
+                                {% if existingPass %}
+                                    <div class="light small">
+                                        Pass: <a href="{{ cpUrl('wallet/passes/view', { id: existingPass.id }) }}"
+                                                 class="code">{{ existingPass.uid[:8] }}…</a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if not loop.last %}
+                    <hr>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </form>
+{% else %}
+    <p class="zilch">No membership passes available.</p>
+{% endif %}

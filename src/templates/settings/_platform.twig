@@ -1,0 +1,92 @@
+{% macro settingsTable(rows, errors, showPreview) %}
+    <table class="data editable">
+        <thead>
+        <tr>
+            <th>Property</th>
+            <th>ENV var</th>
+            <th>Resolved value</th>
+            {% if showPreview %}
+                <th></th>{% endif %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in rows %}
+            {% set property = row[0] %}
+            {% set envVar = row[1] %}
+            {% set value = row[2] %}
+            {% set type = row[3] ?? null %}
+            {% set publicUrl = row[4] ?? null %}
+            {% set hasError = property in (errors|keys) %}
+            <tr>
+                <td>
+                    <span class="status {{ hasError ? 'off' : 'on' }}"></span>
+                    <code>{{ property }}</code>
+                </td>
+                <td><code>{{ envVar }}</code></td>
+                <td>
+                    {% if type == 'color' and value %}
+                        <div class="color static small">
+                            <div class="color-preview" style="background-color: {{ value }}"></div>
+                        </div>
+                        <code>{{ value }}</code>
+                    {% else %}
+                        {{ value ?? '—' }}
+                    {% endif %}
+                </td>
+                {% if showPreview %}
+                    <td>
+                        {% if publicUrl and not hasError %}
+                            <a href="{{ publicUrl }}" target="_blank" rel="noopener" class="btn small">Preview</a>
+                        {% endif %}
+                    </td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endmacro %}
+
+{% if platform.errors|length %}
+    <ul class="errors">
+        {% for attribute, messages in platform.errors %}
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        {% endfor %}
+    </ul>
+    <hr>
+{% endif %}
+
+<h2>Config</h2>
+{{ _self.settingsTable(platform.config, platform.errors, false) }}
+
+<hr>
+
+<h2>Design</h2>
+{{ _self.settingsTable(platform.design, platform.errors, false) }}
+
+<hr>
+
+<h2>Design Files</h2>
+{{ _self.settingsTable(platform.files, platform.errors, true) }}
+
+<hr>
+
+<h2>URLs</h2>
+
+<table class="data editable">
+    <thead>
+    <tr>
+        <th>Endpoint</th>
+        <th>URL</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for row in platform.urls %}
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td><code>{{ row[1] }}</code></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

@@ -1,0 +1,16 @@
+<dl class="meta read-only">
+    <div class="data">
+        <dt class="heading">Created</dt>
+        <dd class="value">{{ pass.dateCreated|datetime }}</dd>
+    </div>
+    <div class="data">
+        <dt class="heading">Updated</dt>
+        <dd class="value">{{ pass.dateUpdated|datetime }}</dd>
+    </div>
+    {% if pass.lastUpdatedAt %}
+        <div class="data">
+            <dt class="heading">Last Updated (Apple)</dt>
+            <dd class="value">{{ pass.lastUpdatedAt|datetime }}</dd>
+        </div>
+    {% endif %}
+</dl>

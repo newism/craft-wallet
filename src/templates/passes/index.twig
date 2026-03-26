@@ -1,0 +1,38 @@
+{% do view.registerAssetBundle('craft\\web\\assets\\admintable\\AdminTableAsset') %}
+
+{% css %}
+    .wallet-shrink { white-space: nowrap; width: 1%; }
+    .wallet-truncate { max-width: 0; }
+    .wallet-truncate a,
+    .wallet-truncate span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .wallet-filters { display: flex; gap: 8px; margin-bottom: 16px; }
+{% endcss %}
+
+<div id="wallet-passes-admin-table"></div>
+
+{% js %}
+    (() => {
+        const container = document.getElementById('wallet-passes-admin-table');
+        let table = null;
+
+        const columns = [
+            { name: '__slot:title', title: Craft.t('app', 'Pass ID') },
+            { name: 'user', title: Craft.t('app', 'User') },
+            { name: 'source', title: Craft.t('app', 'Source') },
+            { name: 'sourceIndex', title: Craft.t('app', 'Source Index') },
+            { name: 'dateCreated', title: Craft.t('app', 'Created') },
+            { name: 'dateUpdated', title: Craft.t('app', 'Updated') },
+        ];
+
+        table = new Craft.VueAdminTable({
+            columns,
+            container: '#wallet-passes-admin-table',
+            emptyMessage: Craft.t('app', 'No wallet passes found.'),
+            tableDataEndpoint: Craft.getActionUrl('wallet/passes/table-data', { generatorHandle: '{{ generatorHandle }}' }),
+            search: true,
+            searchPlaceholder: Craft.t('app', 'Search passes\u2026'),
+            perPage: 50,
+            fullPane: true,
+        });
+    })();
+{% endjs %}

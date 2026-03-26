@@ -1,0 +1,5 @@
+{% for tabId, tab in generatorTabs %}
+    <div id="{{ tabId }}" class="{{ not loop.first ? 'hidden' }}">
+        {% include tab.template with tab.variables only %}
+    </div>
+{% endfor %}

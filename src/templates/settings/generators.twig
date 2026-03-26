@@ -1,0 +1,34 @@
+{# Generators table #}
+{% if generators|length %}
+    <div class="tableview">
+        <div class="tablepane">
+            <table class="data fullwidth">
+                <thead>
+                <tr>
+                    <th scope="row">Name</th>
+                    <th scope="row">Handle</th>
+                    <th scope="row">Google Class Suffix</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for handle, generator in generators %}
+                    <tr>
+                        <th scope="row">
+                            {{ generator.displayName() }}
+                        </th>
+                        <td>
+                            <code>{{ generator.handle() }}</code>
+                        </td>
+                        <td>
+                            <code>{{ generator.getGoogleClassSuffix() }}</code>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% else %}
+    <p class="zilch">No generators registered.</p>
+{% endif %}

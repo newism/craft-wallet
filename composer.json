@@ -1,0 +1,50 @@
+{
+  "name": "newism/craft-wallet",
+  "description": "Apple Wallet and Google Wallet passes for Craft CMS",
+  "type": "craft-plugin",
+  "license": "proprietary",
+  "support": {
+    "email": "support@newism.com.au",
+    "issues": "https://github.com/newism/craft-wallet/issues",
+    "docs": "https://plugins.newism.com.au/wallet/"
+  },
+  "require": {
+    "php": ">=8.2",
+    "craftcms/cms": "^5.6.0",
+    "eo/passbook": "^3.1.5",
+    "firebase/php-jwt": "^7.0",
+    "google/auth": "^1.50"
+  },
+  "require-dev": {
+    "craftcms/ecs": "dev-main",
+    "craftcms/phpstan": "dev-main"
+  },
+  "autoload": {
+    "psr-4": {
+      "newism\\wallet\\": "src/"
+    }
+  },
+  "extra": {
+    "handle": "wallet",
+    "name": "Wallet Passes",
+    "developer": "Newism",
+    "documentationUrl": "https://plugins.newism.com.au/wallet/",
+    "hasCpSettings": true,
+    "class": "newism\\wallet\\Wallet"
+  },
+  "scripts": {
+    "check-cs": "ecs check --ansi",
+    "fix-cs": "ecs check --ansi --fix",
+    "phpstan": "phpstan --memory-limit=1G"
+  },
+  "config": {
+    "sort-packages": true,
+    "platform": {
+      "php": "8.2"
+    },
+    "allow-plugins": {
+      "yiisoft/yii2-composer": true,
+      "craftcms/plugin-installer": true
+    }
+  }
+}
