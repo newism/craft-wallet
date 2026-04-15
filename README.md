@@ -3,9 +3,9 @@
 
 Digital membership and loyalty cards for Apple Wallet and Google Wallet, built into Craft CMS. Bring your own members, generate your own passes, own the data end to end.
 
-![apple-pass.png](docs/screenshots/apple-pass.png)
+![apple-pass.png](docs/public/screenshots/apple-pass.png)
 
-![google-pass.png](docs/screenshots/google-pass.png)
+![google-pass.png](docs/public/screenshots/google-pass.png)
 
 ## Features
 
